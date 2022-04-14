@@ -95,12 +95,12 @@ func (v *Volume) init() (err error) {
 	if err = v.Indexer.Recovery(func(ix *index.Index) error {
 		// must no less than last offset
 		if ix.Offset < lastOffset {
-			log.Error("recovery index: %s lastoffset: %d error(%v)", ix, lastOffset, errors.ErrIndexOffset)
+			log.Errorf("recovery index: %v lastoffset: %d error(%v)", ix, lastOffset, errors.ErrIndexOffset)
 			return errors.ErrIndexOffset
 		}
 		// WARN if index's offset more than the block, discard it.
 		if size = int64(ix.Size) + needle.BlockOffset(ix.Offset); size > v.Block.Size {
-			log.Error("recovery index: %s EOF", ix)
+			log.Errorf("recovery index: %v EOF", ix)
 			return errors.ErrIndexEOF
 		}
 		v.needles[ix.Key] = needle.NewCache(ix.Offset, ix.Size)

@@ -286,7 +286,7 @@ func (i *Indexer) merge() {
 	i.mergeRing()
 	i.flush(true)
 	i.wg.Done()
-	log.Logger.Warningf("index: %s write job exit", i.File)
+	log.Logger.Warnf("index: %s write job exit", i.File)
 	return
 }
 
@@ -328,9 +328,7 @@ func (i *Indexer) Scan(r *os.File, fn func(*Index) error) (err error) {
 		if _, err = rd.Discard(_indexSize); err != nil {
 			break
 		}
-		if log.Logger.V(1) {
-			log.Logger.Info(ix.String())
-		}
+		log.Logger.Info(ix.String())
 		if err = fn(ix); err != nil {
 			break
 		}

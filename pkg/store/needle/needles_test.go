@@ -1,9 +1,9 @@
 package needle
 
 import (
-	"bfs/libs/errors"
 	"bytes"
 	"hash/crc32"
+	"kitten/pkg/errors"
 	"testing"
 )
 

@@ -1,0 +1,21 @@
+run:
+  timeout: 2m
+  skip-files:
+    - ".*_test.go$"
+
+linters:
+  enable-all: true
+  disable:
+    - wsl
+    - gci
+    - gofumpt
+    - wrapcheck
+    - testpackage
+    - godot
+    - tagliatelle
+    - exhaustivestruct
+    - gochecknoinits
+    - gomoddirectives
+    - lll
+    - dupl
+    - funlen
