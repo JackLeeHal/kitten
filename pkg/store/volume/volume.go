@@ -2,14 +2,20 @@ package volume
 
 import (
 	"fmt"
-	"github.com/Terry-Mao/bfs/libs/errors"
-	"github.com/Terry-Mao/bfs/proxy/conf"
+	"kitten/pkg/errors"
+	"kitten/pkg/stat"
+	"kitten/pkg/store/block"
+	"kitten/pkg/store/conf"
+	"kitten/pkg/store/index"
+	"kitten/pkg/store/needle"
 	"sort"
 	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	log "github.com/golang/glog"
 )
 
 const (

@@ -2,11 +2,10 @@ package store
 
 import (
 	"fmt"
-	"github.com/Terry-Mao/bfs/libs/errors"
-	"github.com/Terry-Mao/bfs/libs/meta"
 	"io/ioutil"
 	"kitten/pkg/log"
 	"kitten/pkg/store/conf"
+	myos "kitten/pkg/store/os"
 	"kitten/pkg/store/volume"
 	"os"
 	"path/filepath"
@@ -14,6 +13,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/Terry-Mao/bfs/libs/errors"
 )
 
 // Store get all volume meta data from a index file. index contains volume id,
@@ -124,7 +125,7 @@ func (s *Store) parseFreeVolumeIndex() (err error) {
 			s.FreeId = id
 		}
 	}
-	log.Logger.V(1).Infof("current max free volume id: %d", s.FreeId)
+	log.Logger.Infof("current max free volume id: %d", s.FreeId)
 	return
 }
 
@@ -142,22 +143,23 @@ func (s *Store) parseVolumeIndex() (err error) {
 		lines      []string
 		lbfs, lifs []string
 		zbfs, zifs []string
-		//lim, zim   map[int32]struct{}
+		lim        map[int32]struct{}
+		//zim        map[int32]struct{}
 	)
 	if data, err = ioutil.ReadAll(s.vf); err != nil {
 		log.Logger.Errorf("ioutil.ReadAll() error(%v)", err)
 		return
 	}
 	lines = strings.Split(string(data), "\n")
-	//if lim, lids, lbfs, lifs, err = s.parseIndex(lines); err != nil {
-	//	return
-	//}
+	if lim, lids, lbfs, lifs, err = s.parseIndex(lines); err != nil {
+		return
+	}
 	//if lines, err = s.zk.Volumes(); err != nil {
 	//	return
 	//}
-	//if zim, zids, zbfs, zifs, err = s.parseIndex(lines); err != nil {
-	//	return
-	//}
+	if _, zids, zbfs, zifs, err = s.parseIndex(lines); err != nil {
+		return
+	}
 	// local index
 	for i = 0; i < len(lbfs); i++ {
 		id, bfile, ifile = lids[i], lbfs[i], lifs[i]
@@ -179,19 +181,19 @@ func (s *Store) parseVolumeIndex() (err error) {
 		//}
 	}
 	// zk index
-	//for i = 0; i < len(zbfs); i++ {
-	//	id, bfile, ifile = zids[i], zbfs[i], zifs[i]
-	//	if _, ok = s.Volumes[id]; ok {
-	//		continue
-	//	}
-	//	// if not exists in local
-	//	if _, ok = lim[id]; !ok {
-	//		if v, err = newVolume(id, bfile, ifile, s.conf); err != nil {
-	//			return
-	//		}
-	//		s.Volumes[id] = v
-	//	}
-	//}
+	for i = 0; i < len(zbfs); i++ {
+		id, bfile, ifile = zids[i], zbfs[i], zifs[i]
+		if _, ok = s.Volumes[id]; ok {
+			continue
+		}
+		// if not exists in local
+		if _, ok = lim[id]; !ok {
+			if v, err = newVolume(id, bfile, ifile, s.conf); err != nil {
+				return
+			}
+			s.Volumes[id] = v
+		}
+	}
 	err = s.saveVolumeIndex()
 	return
 }
@@ -287,23 +289,23 @@ func (s *Store) saveVolumeIndex() (err error) {
 }
 
 // SetZookeeper set zookeeper store meta.
-func (s *Store) SetZookeeper() (err error) {
-	// update zk store meta
-	if err = s.zk.SetStore(&meta.Store{
-		Stat:  s.conf.StatListen,
-		Admin: s.conf.AdminListen,
-		Api:   s.conf.ApiListen,
-	}); err != nil {
-		log.Logger.Errorf("zk.SetStore() error(%v)", err)
-		return
-	}
-	// update zk root
-	if err = s.zk.SetRoot(); err != nil {
-		log.Logger.Errorf("zk.SetRoot() error(%v)", err)
-		return
-	}
-	return
-}
+//func (s *Store) SetZookeeper() (err error) {
+//	// update zk store meta
+//	if err = s.zk.SetStore(&meta.Store{
+//		Stat:  s.conf.StatListen,
+//		Admin: s.conf.AdminListen,
+//		Api:   s.conf.ApiListen,
+//	}); err != nil {
+//		log.Logger.Errorf("zk.SetStore() error(%v)", err)
+//		return
+//	}
+//	// update zk root
+//	if err = s.zk.SetRoot(); err != nil {
+//		log.Logger.Errorf("zk.SetRoot() error(%v)", err)
+//		return
+//	}
+//	return
+//}
 
 // freeFile get volume block & index free file name.
 func (s *Store) freeFile(id int32, bdir, idir string) (bfile, ifile string) {
@@ -438,9 +440,9 @@ func (s *Store) AddVolume(id int32) (v *volume.Volume, err error) {
 	s.vlock.Lock()
 	if ov = s.Volumes[id]; ov == nil {
 		s.addVolume(id, v)
-		if err = s.saveVolumeIndex(); err == nil {
-			err = s.zk.AddVolume(id, v.Meta())
-		}
+		//if err = s.saveVolumeIndex(); err == nil {
+		//	err = s.zk.AddVolume(id, v.Meta())
+		//}
 		if err != nil {
 			log.Logger.Errorf("add volume: %d error(%v), local index or zookeeper index may save failed", id, err)
 		}
@@ -476,9 +478,9 @@ func (s *Store) DelVolume(id int32) (err error) {
 	if v = s.Volumes[id]; v != nil {
 		if !v.Compact {
 			s.delVolume(id)
-			if err = s.saveVolumeIndex(); err == nil {
-				err = s.zk.DelVolume(id)
-			}
+			//if err = s.saveVolumeIndex(); err == nil {
+			//	err = s.zk.DelVolume(id)
+			//}
 			if err != nil {
 				log.Logger.Errorf("del volume: %d error(%v), local index or zookeeper index may save failed", id, err)
 			}
@@ -507,9 +509,9 @@ func (s *Store) BulkVolume(id int32, bfile, ifile string) (err error) {
 	s.vlock.Lock()
 	if v = s.Volumes[id]; v == nil {
 		s.addVolume(id, nv)
-		if err = s.saveVolumeIndex(); err == nil {
-			err = s.zk.AddVolume(id, nv.Meta())
-		}
+		//if err = s.saveVolumeIndex(); err == nil {
+		//	err = s.zk.AddVolume(id, nv.Meta())
+		//}
 		if err != nil {
 			log.Logger.Errorf("bulk volume: %d error(%v), local index or zookeeper index may save failed", id, err)
 		}
@@ -551,9 +553,9 @@ func (s *Store) CompactVolume(id int32) (err error) {
 		if err = v.StopCompact(nv); err == nil {
 			// WARN no need update volumes map, use same object, only update
 			// zookeeper the local index cause the block and index file changed.
-			if err = s.saveVolumeIndex(); err == nil {
-				err = s.zk.SetVolume(id, v.Meta())
-			}
+			//if err = s.saveVolumeIndex(); err == nil {
+			//	err = s.zk.SetVolume(id, v.Meta())
+			//}
 			if err != nil {
 				log.Logger.Errorf("compact volume: %d error(%v), local index or zookeeper index may save failed", id, err)
 			}
@@ -591,9 +593,9 @@ func (s *Store) Close() {
 		log.Logger.Infof("volume[%d] close", v.Id)
 		v.Close()
 	}
-	if s.zk != nil {
-		s.zk.Close()
-	}
+	//if s.zk != nil {
+	//	s.zk.Close()
+	//}
 	return
 }
 

@@ -1,10 +1,10 @@
 package volume
 
 import (
-	"bfs/libs/errors"
-	"bfs/store/conf"
-	"bfs/store/needle"
 	"bytes"
+	"kitten/pkg/errors"
+	"kitten/pkg/store/conf"
+	"kitten/pkg/store/needle"
 	"os"
 	"testing"
 	"time"

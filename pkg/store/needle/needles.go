@@ -2,6 +2,7 @@ package needle
 
 import (
 	"io"
+	"kitten/pkg/errors"
 )
 
 // Needles is needle list.
