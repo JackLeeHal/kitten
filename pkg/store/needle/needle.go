@@ -147,10 +147,11 @@ type Needle struct {
 
 // NewWriter new a read needle.
 func NewWriter(key int64, cookie, size int32) *Needle {
-	var n = new(Needle)
-	n.Key = key
-	n.Cookie = cookie
-	n.Size = size
+	n := &Needle{
+		Key:    key,
+		Cookie: cookie,
+		Size:   size,
+	}
 	n.init()
 	n.newBuffer()
 	return n

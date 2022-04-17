@@ -69,13 +69,14 @@ type SuperBlock struct {
 
 // NewSuperBlock creae a new super block.
 func NewSuperBlock(file string, c *conf.Config) (b *SuperBlock, err error) {
-	b = &SuperBlock{}
-	b.conf = c
-	b.File = file
-	b.closed = false
-	b.write = 0
-	b.syncOffset = 0
-	b.Padding = needle.PaddingSize
+	b = &SuperBlock{
+		conf:       c,
+		File:       file,
+		closed:     false,
+		write:      0,
+		syncOffset: 0,
+		Padding:    needle.PaddingSize,
+	}
 	if b.w, err = os.OpenFile(file, os.O_WRONLY|os.O_CREATE, 0664); err != nil {
 		log.Logger.Errorf("os.OpenFile(\"%s\") error(%v)", file, err)
 		b.Close()

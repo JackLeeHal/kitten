@@ -16,9 +16,11 @@ type Needles struct {
 
 // NewNeedles new a needles.
 func NewNeedles(num int) *Needles {
-	var ns = new(Needles)
-	ns.Num = num
-	ns.needles = make([]Needle, num)
+	ns := &Needles{
+		Num:     num,
+		needles: make([]Needle, num),
+	}
+
 	return ns
 }
 
