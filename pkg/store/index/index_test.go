@@ -102,11 +102,11 @@ func TestIndex(t *testing.T) {
 	}
 	// test write
 	if err = i.Write(10, 5, 8); err != nil {
-		t.Error("Write() error(%v)", err)
+		t.Errorf("Write() error(%v)", err)
 		t.FailNow()
 	}
 	if err = i.Flush(); err != nil {
-		t.Error("Flush() error(%v)", err)
+		t.Errorf("Flush() error(%v)", err)
 		t.FailNow()
 	}
 	// test recovery
