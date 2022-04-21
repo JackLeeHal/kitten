@@ -102,7 +102,7 @@ Size:           %d
 
 // NewIndexer new a indexer for async merge index data to disk.
 func NewIndexer(file string, conf *conf.Config) (i *Indexer, err error) {
-	var stat os.FileInfo
+	//var stat os.FileInfo
 	i = &Indexer{}
 	i.File = file
 	i.closed = false
@@ -120,17 +120,17 @@ func NewIndexer(file string, conf *conf.Config) (i *Indexer, err error) {
 		log.Logger.Errorf("os.OpenFile(\"%s\") error(%v)", file, err)
 		return nil, err
 	}
-	if stat, err = i.f.Stat(); err != nil {
+	if _, err = i.f.Stat(); err != nil {
 		log.Logger.Errorf("index: %s Stat() error(%v)", i.File, err)
 		return nil, err
 	}
-	if stat.Size() == 0 {
-		if err = myos.Fallocate(i.f.Fd(), myos.FALLOC_FL_KEEP_SIZE, 0, _fallocSize); err != nil {
-			log.Logger.Errorf("index: %s fallocate() error(err)", i.File, err)
-			i.Close()
-			return nil, err
-		}
-	}
+	//if stat.Size() == 0 {
+	//	if err = myos.Fallocate(i.f.Fd(), myos.FALLOC_FL_KEEP_SIZE, 0, _fallocSize); err != nil {
+	//		log.Logger.Errorf("index: %s fallocate() error(err)", i.File, err)
+	//		i.Close()
+	//		return nil, err
+	//	}
+	//}
 	i.wg.Add(1)
 	i.signal = make(chan int, 1)
 	go i.merge()
