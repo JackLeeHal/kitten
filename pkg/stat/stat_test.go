@@ -10,13 +10,13 @@ func TestStat(t *testing.T) {
 		s1 = &Stats{}
 	)
 	// tps & qps
-	s.TotalAddProcessed = 10
+	//s.TotalAddProcessed = 10
 	s.TotalWriteProcessed = 15
 	s.TotalDelProcessed = 20
 	s.TotalGetProcessed = 25
 	s.TotalFlushProcessed = 30
 	s.TotalCompactProcessed = 35
-	s1.TotalAddProcessed = 10
+	//s1.TotalAddProcessed = 10
 	s1.TotalWriteProcessed = 15
 	s1.TotalDelProcessed = 20
 	s1.TotalGetProcessed = 25
@@ -27,10 +27,10 @@ func TestStat(t *testing.T) {
 	s.Calc()
 	s1.Merge(s)
 	s1.Calc()
-	if s.AddTPS != 10 {
-		t.Errorf("TotalAddTPS: %d not match", s.AddTPS)
-		t.FailNow()
-	}
+	//if s.AddTPS != 10 {
+	//	t.Errorf("TotalAddTPS: %d not match", s.AddTPS)
+	//	t.FailNow()
+	//}
 	if s.WriteTPS != 15 {
 		t.Errorf("TotalWriteTPS: %d not match", s.WriteTPS)
 		t.FailNow()
@@ -51,10 +51,10 @@ func TestStat(t *testing.T) {
 		t.Errorf("TotalCommandsProcessed: %d not match", s.TotalCommandsProcessed)
 		t.FailNow()
 	}
-	if s1.TotalAddProcessed != 20 {
-		t.Errorf("TotalAddProcessed: %d not match", s1.TotalAddProcessed)
-		t.FailNow()
-	}
+	//if s1.TotalAddProcessed != 20 {
+	//	t.Errorf("TotalAddProcessed: %d not match", s1.TotalAddProcessed)
+	//	t.FailNow()
+	//}
 	if s1.TotalWriteProcessed != 30 {
 		t.Errorf("TotalWriteProcessed: %d not match", s1.TotalWriteProcessed)
 		t.FailNow()
@@ -75,10 +75,10 @@ func TestStat(t *testing.T) {
 		t.Errorf("TotalCompactProcessed: %d not match", s1.TotalCompactProcessed)
 		t.FailNow()
 	}
-	if s1.AddTPS != 20 {
-		t.Errorf("TotalAddTPS: %d not match", s1.AddTPS)
-		t.FailNow()
-	}
+	//if s1.AddTPS != 20 {
+	//	t.Errorf("TotalAddTPS: %d not match", s1.AddTPS)
+	//	t.FailNow()
+	//}
 	if s1.WriteTPS != 30 {
 		t.Errorf("TotalWriteTPS: %d not match", s1.WriteTPS)
 		t.FailNow()

@@ -1,10 +1,10 @@
 package block
 
 import (
-	"bfs/store/conf"
-	"bfs/store/needle"
 	"bytes"
 	"fmt"
+	"kitten/pkg/store/conf"
+	"kitten/pkg/store/needle"
 	"os"
 	"testing"
 )

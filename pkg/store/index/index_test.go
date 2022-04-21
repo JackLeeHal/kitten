@@ -1,9 +1,9 @@
 package index
 
 import (
-	"bfs/libs/errors"
-	"bfs/store/conf"
-	"bfs/store/needle"
+	"kitten/pkg/errors"
+	"kitten/pkg/store/conf"
+	"kitten/pkg/store/needle"
 	"os"
 	"testing"
 	"time"

@@ -1,7 +1,7 @@
 package index
 
 import (
-	"bfs/libs/errors"
+	"kitten/pkg/errors"
 	"testing"
 )
 
