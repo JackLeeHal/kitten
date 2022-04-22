@@ -3,6 +3,7 @@ package store
 import (
 	"fmt"
 	"io/ioutil"
+	"kitten/pkg/errors"
 	"kitten/pkg/log"
 	"kitten/pkg/store/conf"
 	myos "kitten/pkg/store/os"
@@ -13,8 +14,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/Terry-Mao/bfs/libs/errors"
 )
 
 // Store get all volume metadata from an index file. index contains volume id,

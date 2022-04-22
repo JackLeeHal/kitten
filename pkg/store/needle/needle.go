@@ -347,7 +347,7 @@ func (n *Needle) ParseFrom(rd *bufio.Reader) (err error) {
 	return
 }
 
-// parse Parse needle from inner buffer, usually call after ReadAt.
+// Parse needle from inner buffer, usually call after ReadAt.
 func (n *Needle) Parse() (err error) {
 	var dataOffset int32
 	if err = n.parseHeader(n.buffer[:_headerSize]); err == nil {

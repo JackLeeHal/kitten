@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package store;
+
+option go_package = "api/store";
+
+service Store {
+  rpc GetFile(GetFileRequest) returns (stream GetFileResponse) {}
+  rpc UploadFile(UploadFileRequest) returns (UploadFileResponse) {}
+}
+
+// Get file by volume id and needle key, needle cookie.
+message GetFileRequest {
+  // volume id
+  int32 vid    = 1;
+  // needle key
+  int64 key    = 2;
+  // needle cookie
+  int32 cookie = 3;
+}
+
+message GetFileResponse {
+  bytes data = 1;
+}
+
+message UploadFileRequest {
+  // volume id
+  int32 vid    = 1;
+  // needle key
+  int64 key    = 2;
+  // needle cookie
+  int32 cookie = 3;
+  // file data
+  bytes data   = 4;
+}
+
+message UploadFileResponse {
+  string message = 1;
+}

@@ -49,7 +49,7 @@ var (
 	_pagesize = syscall.Getpagesize()
 )
 
-// An Volume contains one superblock and many needles.
+// SuperBlock An Volume contains one superblock and many needles.
 type SuperBlock struct {
 	r       *os.File
 	w       *os.File
@@ -67,7 +67,7 @@ type SuperBlock struct {
 	syncOffset uint32
 }
 
-// NewSuperBlock creae a new super block.
+// NewSuperBlock create a new super block.
 func NewSuperBlock(file string, c *conf.Config) (b *SuperBlock, err error) {
 	b = &SuperBlock{
 		conf:       c,
@@ -95,7 +95,7 @@ func NewSuperBlock(file string, c *conf.Config) (b *SuperBlock, err error) {
 	return
 }
 
-// init init block file, add/parse meta info.
+// init block file, add/parse meta info.
 func (b *SuperBlock) init() (err error) {
 	var stat os.FileInfo
 	if stat, err = b.r.Stat(); err != nil {
@@ -159,7 +159,7 @@ func (b *SuperBlock) parseMeta() (err error) {
 	return
 }
 
-// Write write needle to the block.
+// Write needle to the block.
 func (b *SuperBlock) Write(n *needle.Needle) (err error) {
 	if b.LastErr != nil {
 		return b.LastErr
@@ -179,7 +179,7 @@ func (b *SuperBlock) Write(n *needle.Needle) (err error) {
 	return
 }
 
-// flush flush writer buffer.
+// flush writer buffer.
 func (b *SuperBlock) flush(force bool) (err error) {
 	var (
 		fd     uintptr
@@ -253,7 +253,7 @@ func (b *SuperBlock) Delete(offset uint32) (err error) {
 	return
 }
 
-// Scan scan a block file.
+// Scan a block file.
 func (b *SuperBlock) Scan(r *os.File, offset uint32, fn func(*needle.Needle, uint32, uint32) error) (err error) {
 	var (
 		so, eo uint32
@@ -316,7 +316,7 @@ func (b *SuperBlock) Scan(r *os.File, offset uint32, fn func(*needle.Needle, uin
 	return
 }
 
-// Recovery recovery needles map from super block.
+// Recovery needles map from super block.
 func (b *SuperBlock) Recovery(offset uint32, fn func(*needle.Needle, uint32, uint32) error) (err error) {
 	var rsize int64
 	// WARN block may be no left data, must update block offset first
@@ -359,7 +359,7 @@ func (b *SuperBlock) Recovery(offset uint32, fn func(*needle.Needle, uint32, uin
 	return
 }
 
-// Compact compact the orig block, copy to disk dst block.
+// Compact the orig block, copy to disk dst block.
 func (b *SuperBlock) Compact(offset uint32, fn func(*needle.Needle, uint32, uint32) error) (err error) {
 	if b.LastErr != nil {
 		return b.LastErr
@@ -381,7 +381,7 @@ func (b *SuperBlock) Compact(offset uint32, fn func(*needle.Needle, uint32, uint
 	return
 }
 
-// Open open the closed superblock, must called after NewSuperBlock.
+// Open the closed superblock, must called after NewSuperBlock.
 func (b *SuperBlock) Open() (err error) {
 	if !b.closed {
 		return
@@ -404,7 +404,7 @@ func (b *SuperBlock) Open() (err error) {
 	return
 }
 
-// Close close the superblock.
+// Close the superblock.
 func (b *SuperBlock) Close() {
 	var err error
 	if b.w != nil {
@@ -430,7 +430,7 @@ func (b *SuperBlock) Close() {
 	return
 }
 
-// Destroy destroy the block.
+// Destroy the block.
 func (b *SuperBlock) Destroy() {
 	if !b.closed {
 		b.Close()

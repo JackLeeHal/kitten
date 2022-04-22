@@ -3,6 +3,7 @@ package volume
 import (
 	"fmt"
 	"kitten/pkg/errors"
+	"kitten/pkg/log"
 	"kitten/pkg/stat"
 	"kitten/pkg/store/block"
 	"kitten/pkg/store/conf"
@@ -14,8 +15,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
-
-	log "github.com/golang/glog"
 )
 
 const (
@@ -30,7 +29,7 @@ func (p uint32Slice) Len() int           { return len(p) }
 func (p uint32Slice) Less(i, j int) bool { return p[i] < p[j] }
 func (p uint32Slice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 
-// An store server contains many logic Volume, volume is superblock container.
+// Volume An store server contains many log.Loggeric Volume, volume is superblock container.
 type Volume struct {
 	wg   sync.WaitGroup
 	lock sync.RWMutex
@@ -54,20 +53,20 @@ type Volume struct {
 
 // NewVolume new a volume and init it.
 func NewVolume(id int32, bfile, ifile string, c *conf.Config) (v *Volume, err error) {
-	v = &Volume{}
-	v.Id = id
-	v.Stats = &stat.Stats{}
-	// data
-	v.needles = make(map[int64]int64)
-	v.ch = make(chan uint32, c.Volume.SyncDelete)
-	v.conf = c
-	// compact
-	v.Compact = false
-	v.CompactOffset = 0
-	v.CompactTime = 0
-	v.compactKeys = []int64{}
+	v = &Volume{
+		Id:      id,
+		Stats:   &stat.Stats{},
+		needles: make(map[int64]int64),
+		ch:      make(chan uint32, c.Volume.SyncDelete),
+		conf:    c,
+		// compact
+		Compact:       false,
+		CompactOffset: 0,
+		CompactTime:   0,
+		compactKeys:   []int64{},
+		closed:        false,
+	}
 	// status
-	v.closed = false
 	if v.Block, err = block.NewSuperBlock(bfile, c); err != nil {
 		return nil, err
 	}
@@ -81,6 +80,7 @@ func NewVolume(id int32, bfile, ifile string, c *conf.Config) (v *Volume, err er
 	}
 	v.wg.Add(1)
 	go v.delproc()
+
 	return
 }
 
@@ -95,12 +95,12 @@ func (v *Volume) init() (err error) {
 	if err = v.Indexer.Recovery(func(ix *index.Index) error {
 		// must no less than last offset
 		if ix.Offset < lastOffset {
-			log.Errorf("recovery index: %v lastoffset: %d error(%v)", ix, lastOffset, errors.ErrIndexOffset)
+			log.Logger.Errorf("recovery index: %v lastoffset: %d error(%v)", ix, lastOffset, errors.ErrIndexOffset)
 			return errors.ErrIndexOffset
 		}
 		// WARN if index's offset more than the block, discard it.
 		if size = int64(ix.Size) + needle.BlockOffset(ix.Offset); size > v.Block.Size {
-			log.Errorf("recovery index: %v EOF", ix)
+			log.Logger.Errorf("recovery index: %v EOF", ix)
 			return errors.ErrIndexEOF
 		}
 		v.needles[ix.Key] = needle.NewCache(ix.Offset, ix.Size)
@@ -126,6 +126,7 @@ func (v *Volume) init() (err error) {
 	}
 	// flush index
 	err = v.Indexer.Flush()
+
 	return
 }
 
@@ -141,7 +142,7 @@ func (v *Volume) ParseMeta(line string) (block, index string, id int32, err erro
 		seps []string
 	)
 	if seps = strings.Split(line, ","); len(seps) != 3 {
-		log.Errorf("volume index: \"%s\" format error", line)
+		log.Logger.Errorf("volume index: \"%s\" format error", line)
 		err = errors.ErrStoreVolumeIndex
 		return
 	}
@@ -150,8 +151,9 @@ func (v *Volume) ParseMeta(line string) (block, index string, id int32, err erro
 	if vid, err = strconv.ParseInt(seps[2], 10, 32); err == nil {
 		id = int32(vid)
 	} else {
-		log.Errorf("volume index: \"%s\" format error", line)
+		log.Logger.Errorf("volume index: \"%s\" format error", line)
 	}
+
 	return
 }
 
@@ -176,10 +178,8 @@ func (v *Volume) read(n *needle.Needle) (err error) {
 	if n.TotalSize != size {
 		return errors.ErrNeedleSize
 	}
-	if log.V(1) {
-		log.Infof("get needle key: %d, cookie: %d, offset: %d, size: %d", n.Key, n.Cookie, n.Offset, size)
-		log.Infof("%v\n", n)
-	}
+	log.Logger.Infof("get needle key: %d, cookie: %d, offset: %d, size: %d", n.Key, n.Cookie, n.Offset, size)
+	log.Logger.Infof("%v\n", n)
 	// needles map may be out-dated, recheck
 	if n.Flag == needle.FlagDel {
 		v.lock.Lock()
@@ -191,6 +191,7 @@ func (v *Volume) read(n *needle.Needle) (err error) {
 		atomic.AddUint64(&v.Stats.TotalReadBytes, uint64(size))
 		atomic.AddUint64(&v.Stats.TotalGetDelay, uint64(time.Now().UnixNano()-now))
 	}
+
 	return
 }
 
@@ -220,6 +221,7 @@ func (v *Volume) Read(key int64, cookie int32) (n *needle.Needle, err error) {
 			n = nil
 		}
 	}
+
 	return
 }
 
@@ -248,6 +250,7 @@ func (v *Volume) Probe() (err error) {
 		}
 		n.Close()
 	}
+
 	return
 }
 
@@ -270,10 +273,8 @@ func (v *Volume) Write(n *needle.Needle) (err error) {
 	}
 	v.lock.Unlock()
 	if err == nil {
-		if log.V(1) {
-			log.Infof("add needle, offset: %d, size: %d", n.Offset, n.TotalSize)
-			log.Info(n)
-		}
+		log.Logger.Infof("add needle, offset: %d, size: %d", n.Offset, n.TotalSize)
+		log.Logger.Info(n)
 		if ok {
 			offset, _ = needle.Cache(nc)
 			v.del(offset)
@@ -282,6 +283,7 @@ func (v *Volume) Write(n *needle.Needle) (err error) {
 		atomic.AddUint64(&v.Stats.TotalWriteBytes, uint64(n.TotalSize))
 		atomic.AddUint64(&v.Stats.TotalWriteDelay, uint64(time.Now().UnixNano()-now))
 	}
+
 	return
 }
 
@@ -309,10 +311,8 @@ func (v *Volume) Writes(ns *needle.Needles) (err error) {
 			ncs = append(ncs, nc)
 		}
 		v.needles[n.Key] = needle.NewCache(offset, n.TotalSize)
-		if log.V(1) {
-			log.Infof("add needle, offset: %d, size: %d", offset, n.TotalSize)
-			log.Info(n)
-		}
+		log.Logger.Infof("add needle, offset: %d, size: %d", offset, n.TotalSize)
+		log.Logger.Info(n)
 	}
 	v.lock.Unlock()
 	if err == nil {
@@ -324,6 +324,7 @@ func (v *Volume) Writes(ns *needle.Needles) (err error) {
 		atomic.AddUint64(&v.Stats.TotalWriteBytes, uint64(ns.TotalSize))
 		atomic.AddUint64(&v.Stats.TotalWriteDelay, uint64(time.Now().UnixNano()-now))
 	}
+
 	return
 }
 
@@ -335,13 +336,14 @@ func (v *Volume) del(offset uint32) (err error) {
 	select {
 	case v.ch <- offset:
 	default:
-		log.Errorf("volume: %d send signal failed", v.Id)
+		log.Logger.Errorf("volume: %d send signal failed", v.Id)
 		err = errors.ErrVolumeDel
 	}
+
 	return
 }
 
-// Delete logical delete a needle, update disk needle flag and memory needle
+// Delete log.Loggerical delete a needle, update disk needle flag and memory needle
 // cache offset to zero.
 func (v *Volume) Delete(key int64) (err error) {
 	var (
@@ -368,6 +370,7 @@ func (v *Volume) Delete(key int64) (err error) {
 	if err == nil {
 		err = v.del(offset)
 	}
+
 	return
 }
 
@@ -380,7 +383,7 @@ func (v *Volume) delproc() {
 		offset  uint32
 		offsets []uint32
 	)
-	log.Infof("volume: %d del job start", v.Id)
+	log.Logger.Infof("volume: %d del job start", v.Id)
 	for {
 		select {
 		case offset = <-v.ch:
@@ -415,7 +418,8 @@ func (v *Volume) delproc() {
 		}
 	}
 	v.wg.Done()
-	log.Warningf("volume[%d] del job exit", v.Id)
+	log.Logger.Warnf("volume[%d] del job exit", v.Id)
+
 	return
 }
 
@@ -430,6 +434,7 @@ func (v *Volume) compact(nv *Volume) (err error) {
 		v.CompactOffset = eo
 		return
 	})
+
 	return
 }
 
@@ -451,6 +456,7 @@ func (v *Volume) StartCompact(nv *Volume) (err error) {
 		return
 	}
 	atomic.AddUint64(&v.Stats.TotalCompactProcessed, 1)
+
 	return
 }
 
@@ -514,6 +520,7 @@ func (v *Volume) Open() (err error) {
 	v.closed = false
 	v.wg.Add(1)
 	go v.delproc()
+
 	return
 }
 
