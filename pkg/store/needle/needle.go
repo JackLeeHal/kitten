@@ -377,6 +377,19 @@ func (n *Needle) ReadFrom(rd io.Reader) (err error) {
 	return
 }
 
+// ReadFromBytes read from raw bytes and write into needle buffer.
+func (n *Needle) ReadFromBytes(data []byte) (err error) {
+	var dataOffset int32
+	dataOffset = _headerSize + n.Size
+	data = n.buffer[_headerSize:dataOffset]
+	if err = n.writeHeader(n.buffer[:_headerSize]); err == nil {
+		n.Data = data
+		n.Checksum = crc32.Update(0, _crc32Table, data)
+		err = n.writeFooter(n.buffer[dataOffset:n.TotalSize])
+	}
+	return
+}
+
 func (n *Needle) String() string {
 	var dn = _displayData
 	if len(n.Data) < dn {

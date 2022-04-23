@@ -4,14 +4,14 @@
 
 ## What is kitten
 Kitten 是一个为大规模小文件存储而生的分布式文件系统，核心架构参考了[Facebook的Haystack](https://www.usenix.org/legacy/event/osdi10/tech/full_papers/Beaver.pdf)，
-并且从[bfs](https://github.com/Terry-Mao/bfs)中学习了很多优化手段。
+并且从[bfs](https://github.com/Terry-Mao/bfs)中学习了很多优化手段。（本项目只是一个学习项目，未经过生产环境验证）
 
 ## Features
 
 ## Quick Start
 
 ## Introduction
-传统文件系统在存储大量小文件的情况下，首先会出现元数据的IO瓶颈，因为每次读取一个文件需要先做一次IO找到元数据，再通过元数据找到真正的文件。并且元数据中存储的像permission、访问时间等数据可能是无用的。
+传统文件系统在存储大量小文件的情况下，会出现元数据的IO瓶颈，因为每次读取一个文件需要先做一次IO找到元数据，再通过元数据找到真正的文件。并且元数据中存储的像permission、访问时间等数据可能是无用的。
 在小文件数量很大的情况下你存一个数据对应的元数据大小可能跟你的数据大小差不多，这样就造成了大量的空间浪费。
 
 Kitten从两个方向优化了这个现象：
@@ -27,6 +27,8 @@ Kitten的设计目标是：`高吞吐+低延时`，`有容错机制`，`低成�
 ![](docs/kitten.png)
 ### Proxy
 
+Proxy模块作为一个面向用户的模块，屏蔽了Kitten内部的各种操作，向外暴露三个简单的API，`get`、`post`和`delete`。分别代表读取、写入和删除操作。Proxy向下都是通过grpc进行通信。
+
 ### Directory
 
 ### Cache
@@ -34,10 +36,10 @@ Kitten的设计目标是：`高吞吐+低延时`，`有容错机制`，`低成�
 ### Store
 
 ## Roadmap
-| Name                     | Issue                                               | Description                                                                     |
-|--------------------------|-----------------------------------------------------|---------------------------------------------------------------------------------|
-| Kitten's basic component | [#1](https://github.com/JackLeeHal/kitten/issues/1) | Implement basic component including `Store`, `Cache`, `Directory`               |
-| Introduce Etcd           | [#2](https://github.com/JackLeeHal/kitten/issues/2) | Introduce Etcd for distributed management.                                      |
-| Expose easy APIs         | [#3](https://github.com/JackLeeHal/kitten/issues/3) | Find an elegantly way to expose APIs.                                           |
-| Support S3 API           | [#4](https://github.com/JackLeeHal/kitten/issues/4) | As S3 APIs are the de facto standards for OSS. Consider suppport S3 style APIs. |
-| Implement erasure code   | [#4](https://github.com/JackLeeHal/kitten/issues/5) | Split data into two groups(hot/warm), use erasure code to store warm data.      |
+| Name                     | Issue                                               | Description                                                                    |
+|--------------------------|-----------------------------------------------------|--------------------------------------------------------------------------------|
+| Kitten's basic component | [#1](https://github.com/JackLeeHal/kitten/issues/1) | Implement basic component including `Store`, `Cache`, `Directory`              |
+| Introduce Etcd           | [#2](https://github.com/JackLeeHal/kitten/issues/2) | Introduce Etcd for distributed management.                                     |
+| Expose easy APIs         | [#3](https://github.com/JackLeeHal/kitten/issues/3) | Find an elegantly way to expose APIs.                                          |
+| Support S3 API           | [#4](https://github.com/JackLeeHal/kitten/issues/4) | As S3 APIs are the de facto standards for OSS， support S3 style APIs. |
+| Implement erasure code   | [#5](https://github.com/JackLeeHal/kitten/issues/5) | Split data into two groups(hot/warm), use erasure code to store warm data.     |

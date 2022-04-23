@@ -8,10 +8,10 @@ BatchMaxNum    = 9
 
 [Store]
 # volume meta index
-VolumeIndex      = "/tmp/volume.idx"
+VolumeIndex      = "C:\\Users\\Administrator.DESKTOP-DTQSFP1\\Desktop\\project\\kitten\\tmp\\volume.idx"
 
 # free volume meta index
-FreeVolumeIndex  = "/tmp/free_volume.idx"
+FreeVolumeIndex  = "C:\\Users\\Administrator.DESKTOP-DTQSFP1\\Desktop\\project\\kitten\\tmp\\free_volume.idx"
 
 [Volume]
 # sync delete operation after N delete

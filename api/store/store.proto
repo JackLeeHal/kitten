@@ -5,8 +5,9 @@ package store;
 option go_package = "api/store";
 
 service Store {
-  rpc GetFile(GetFileRequest) returns (stream GetFileResponse) {}
-  rpc UploadFile(stream UploadFileRequest) returns (UploadFileResponse) {}
+  rpc GetFile(GetFileRequest) returns (GetFileResponse) {}
+  rpc UploadFile(UploadFileRequest) returns (UploadFileResponse) {}
+  rpc DeleteFile(DeleteFileRequest) returns (DeleteFileResponse) {}
 }
 
 // Get file by volume id and needle key, needle cookie.
@@ -35,5 +36,16 @@ message UploadFileRequest {
 }
 
 message UploadFileResponse {
+  string message = 1;
+}
+
+message DeleteFileRequest {
+  // volume id
+  int32 vid    = 1;
+  // needle key
+  int64 key    = 2;
+}
+
+message DeleteFileResponse {
   string message = 1;
 }
