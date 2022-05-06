@@ -3,31 +3,31 @@
 [![Go](https://github.com/JackLeeHal/kitten/actions/workflows/go.yml/badge.svg)](https://github.com/JackLeeHal/kitten/actions/workflows/go.yml)
 
 ## What is kitten
-Kitten 是一个为大规模小文件存储而生的分布式文件系统，核心架构参考了[Facebook的Haystack](https://www.usenix.org/legacy/event/osdi10/tech/full_papers/Beaver.pdf)，
-并且从[bfs](https://github.com/Terry-Mao/bfs)中学习了很多优化手段。（本项目只是一个学习项目，未经过生产环境验证）
+Kitten is a distributed file system optimized for small files storage，core concepts based on [Facebook‘s Haystack](https://www.usenix.org/legacy/event/osdi10/tech/full_papers/Beaver.pdf)，
+and [bfs](https://github.com/Terry-Mao/bfs)。（It's just a toy project, never verified in production environment）
 
 ## Features
 
 ## Quick Start
 
 ## Introduction
-传统文件系统在存储大量小文件的情况下，会出现元数据的IO瓶颈，因为每次读取一个文件需要先做一次IO找到元数据，再通过元数据找到真正的文件。并且元数据中存储的像permission、访问时间等数据可能是无用的。
-在小文件数量很大的情况下你存一个数据对应的元数据大小可能跟你的数据大小差不多，这样就造成了大量的空间浪费。
+When the traditional file system stores a large number of small files, there will be an IO bottleneck of metadata, because each time you read a file,
+you need to do IO first to find the metadata, and then find the real file through the metadata.And the data such as permission and access time stored in metadata may be useless.
+In the case of a large number of small files, the metadata size corresponding to the data you save may be similar to your data size, resulting in a lot of space waste.
 
-Kitten从两个方向优化了这个现象：
-1. 顺序写：传统的机械硬盘由于有寻道和旋转这样的机械动作，顺序写入的性能是远大于随机写入的，所以Kitten的写入设计为顺序append。
-2. 元数据方面：Kitten将所有小文件append到一个大文件里，这里引入两个概念Superblock和Needle，
-Superblock就是一个超大块，集合了顺序写入的小文件，Needle就是其中的每个小文件，读取时只需要通过内存里面维护的每个Needle的offset和size就能找到对应的文件。
+Kitten optimized this phenomenon in two directions：
+1. Sequential writing: because the traditional mechanical hard disk has mechanical actions such as seek and rotation, the performance of sequential writing is much greater than that of random writing, so kitten's writing is designed as sequential append.
+2. Metadata：Kitten appends all small files to a large file to reduce metadata，Two concepts superblock and needle are introduced here,
+   Superblock is a super block that collects small files written in sequence. Need is each small file in it. When reading, you only need to find the corresponding file through the offset and size of each need maintained in memory.
 
-Kitten适合的文件特点是：`一次写入`，`从不更新`，`不定期会读`，`极少删除`.
+Kitten is suitable for files that：`written once`, `read often`, `never modified`, and `rarely deleted`.
+Goal of Kitten：`High throughput + low delay`, `Fault-tolerant`, `Cost-effective`, `Simple`.
 
-Kitten的设计目标是：`高吞吐+低延时`，`有容错机制`，`低成本`，`架构简单`.
-
-围绕这些目标，Kitten包含了以下几个模块：
+Kitten includes the following modules：
 ![](docs/kitten.png)
 ### Proxy
 
-Proxy模块作为一个面向用户的模块，屏蔽了Kitten内部的各种操作，向外暴露三个简单的API，`get`、`post`和`delete`。分别代表读取、写入和删除操作。Proxy向下都是通过grpc进行通信。
+As a user oriented module, the proxy module shields various operations inside kitten and exposes three simple APIs, ` get ', ` post' and ` delete '. Represent read, write and delete operations respectively. The proxy communicates downward through grpc.
 
 ### Directory
 
