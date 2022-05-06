@@ -1,10 +1,10 @@
-# kitten
+# kitten🐱
 
 [![Go](https://github.com/JackLeeHal/kitten/actions/workflows/go.yml/badge.svg)](https://github.com/JackLeeHal/kitten/actions/workflows/go.yml)
 
 ## What is kitten
 Kitten is a distributed file system optimized for small files storage，core concepts based on [Facebook‘s Haystack](https://www.usenix.org/legacy/event/osdi10/tech/full_papers/Beaver.pdf)，
-and [bfs](https://github.com/Terry-Mao/bfs)。（It's just a toy project, never verified in production environment）
+learned many memory optimization from [bfs](https://github.com/Terry-Mao/bfs)。（It's just a toy project, never verified in production environment）
 
 ## Features
 
@@ -27,7 +27,7 @@ Kitten includes the following modules：
 ![](docs/kitten.png)
 ### Proxy
 
-As a user oriented module, the proxy module shields various operations inside kitten and exposes three simple APIs, ` get ', ` post' and ` delete '. Represent read, write and delete operations respectively. The proxy communicates downward through grpc.
+As a user oriented module, the proxy module shields various operations inside kitten and exposes three simple APIs, `get`, `post` and `delete`. Represent read, write and delete operations respectively. The proxy communicates downward through grpc.
 
 ### Directory
 

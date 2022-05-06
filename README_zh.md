@@ -1,4 +1,4 @@
-# kitten
+# kitten🐱
 
 [![Go](https://github.com/JackLeeHal/kitten/actions/workflows/go.yml/badge.svg)](https://github.com/JackLeeHal/kitten/actions/workflows/go.yml)
 

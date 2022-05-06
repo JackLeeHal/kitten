@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"kitten/pkg/errors"
+	"kitten/pkg/etcd"
 	"kitten/pkg/log"
 	"kitten/pkg/store/conf"
 	myos "kitten/pkg/store/os"
@@ -51,6 +52,7 @@ type Store struct {
 	FreeId      int32
 	Volumes     map[int32]*volume.Volume // split volumes lock
 	FreeVolumes []*volume.Volume
+	etcd        *etcd.Client
 	conf        *conf.Config
 	flock       sync.Mutex // protect FreeId & saveIndex
 	vlock       sync.Mutex // protect Volumes map
@@ -405,6 +407,9 @@ func (s *Store) AddVolume(id int32) (v *volume.Volume, err error) {
 	s.vlock.Lock()
 	if ov = s.Volumes[id]; ov == nil {
 		s.addVolume(id, v)
+		if err = s.saveVolumeIndex(); err == nil {
+
+		}
 		if err != nil {
 			log.Logger.Errorf("add volume: %d error(%v), local index or zookeeper index may save failed", id, err)
 		}
