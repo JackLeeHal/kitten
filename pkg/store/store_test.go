@@ -2,6 +2,7 @@ package store
 
 import (
 	"bytes"
+	"context"
 	"kitten/pkg/store/conf"
 	"kitten/pkg/store/needle"
 	"kitten/pkg/store/volume"
@@ -100,7 +101,7 @@ func TestStore(t *testing.T) {
 		t.Errorf("s.AddFreeVolume() error(%v)", err)
 		t.FailNow()
 	}
-	if v, err = s.AddVolume(1); err != nil {
+	if v, err = s.AddVolume(context.Background(), 1); err != nil {
 		t.Errorf("AddVolume() error(%v)", err)
 		t.FailNow()
 	}
@@ -122,7 +123,7 @@ func TestStore(t *testing.T) {
 		t.Errorf("v.WriteTo(1) error(%v)", err)
 		t.FailNow()
 	}
-	if err = s.BulkVolume(2, "./test/block_store_1", "./test/block_store_1.idx"); err != nil {
+	if err = s.BulkVolume(context.Background(), 2, "./test/block_store_1", "./test/block_store_1.idx"); err != nil {
 		t.Errorf("Bulk(1) error(%v)", err)
 		t.FailNow()
 	}
@@ -146,7 +147,7 @@ func TestStore(t *testing.T) {
 	} else {
 		n.Close()
 	}
-	if err = s.CompactVolume(1); err != nil {
+	if err = s.CompactVolume(context.Background(), 1); err != nil {
 		t.Errorf("Compress(1) error(%v)", err)
 		t.FailNow()
 	}
@@ -160,7 +161,7 @@ func TestStore(t *testing.T) {
 	} else {
 		n.Close()
 	}
-	s.DelVolume(1)
+	s.DelVolume(context.Background(), 1)
 	if v = s.Volumes[1]; v != nil {
 		t.Error(err)
 		t.FailNow()

@@ -13,6 +13,7 @@ learned many memory optimization from [bfs](https://github.com/Terry-Mao/bfs)。
 ## Introduction
 When the traditional file system stores a large number of small files, there will be an IO bottleneck of metadata, because each time you read a file,
 you need to do IO first to find the metadata, and then find the real file through the metadata.And the data such as permission and access time stored in metadata may be useless.
+
 In the case of a large number of small files, the metadata size corresponding to the data you save may be similar to your data size, resulting in a lot of space waste.
 
 Kitten optimized this phenomenon in two directions：
@@ -25,6 +26,9 @@ Goal of Kitten：`High throughput + low delay`, `Fault-tolerant`, `Cost-effectiv
 
 Kitten includes the following modules：
 ![](docs/kitten.png)
+
+### Store
+
 ### Proxy
 
 As a user oriented module, the proxy module shields various operations inside kitten and exposes three simple APIs, `get`, `post` and `delete`. Represent read, write and delete operations respectively. The proxy communicates downward through grpc.
@@ -33,13 +37,11 @@ As a user oriented module, the proxy module shields various operations inside ki
 
 ### Cache
 
-### Store
-
 ## Roadmap
-| Name                     | Issue                                               | Description                                                                    |
-|--------------------------|-----------------------------------------------------|--------------------------------------------------------------------------------|
-| Kitten's basic component | [#1](https://github.com/JackLeeHal/kitten/issues/1) | Implement basic component including `Store`, `Cache`, `Directory`              |
-| Introduce Etcd           | [#2](https://github.com/JackLeeHal/kitten/issues/2) | Introduce Etcd for distributed management.                                     |
-| Expose easy APIs         | [#3](https://github.com/JackLeeHal/kitten/issues/3) | Find an elegantly way to expose APIs.                                          |
+| Name                     | Issue                                               | Description                                                  |
+| ------------------------ | --------------------------------------------------- | ------------------------------------------------------------ |
+| Kitten's basic component | [#1](https://github.com/JackLeeHal/kitten/issues/1) | Implement basic component including ~~`Store`~~, `Cache`, `Directory`(WIP) |
+| Introduce Etcd           | [#2](https://github.com/JackLeeHal/kitten/issues/2) | Introduce Etcd for distributed management(WIP).              |
+| Expose easy APIs         | [#3](https://github.com/JackLeeHal/kitten/issues/3) | Find an elegantly way to expose APIs.                        |
 | Support S3 API           | [#4](https://github.com/JackLeeHal/kitten/issues/4) | As S3 APIs are the de facto standards for OSS， support S3 style APIs. |
-| Implement erasure code   | [#5](https://github.com/JackLeeHal/kitten/issues/5) | Split data into two groups(hot/warm), use erasure code to store warm data.     |
+| Implement erasure code   | [#5](https://github.com/JackLeeHal/kitten/issues/5) | Split data into two groups(hot/warm), use erasure code to store warm data. |

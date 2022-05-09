@@ -3,6 +3,7 @@ package etcd
 import (
 	"context"
 	clientv3 "go.etcd.io/etcd/client/v3"
+	"kitten/pkg/log"
 	"path"
 	"strconv"
 	"time"
@@ -32,6 +33,40 @@ func (c *Client) AddVolume(ctx context.Context, id int32, data []byte) error {
 	_, err := c.Client.Put(ctx, c.volumePath(id), string(data))
 
 	return err
+}
+
+func (c *Client) SetVolume(ctx context.Context, id int32, data []byte) error {
+	vPath := c.volumePath(id)
+	if _, err := c.Get(ctx, vPath); err != nil {
+		log.Logger.Errorf("etcd.Get(\"%s\") error(%v)", vPath, err)
+
+		return err
+	}
+	_, err := c.Client.Put(ctx, vPath, string(data))
+	if err != nil {
+		log.Logger.Errorf("etcd.Put(\"%s\", \"%s\") error(%v)", vPath, string(data), err)
+
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) DelVolume(ctx context.Context, id int32) error {
+	vPath := c.volumePath(id)
+	if _, err := c.Get(ctx, vPath); err != nil {
+		log.Logger.Errorf("etcd.Get(\"%s\") error(%v)", vPath, err)
+
+		return err
+	}
+	_, err := c.Client.Delete(ctx, vPath)
+	if err != nil {
+		log.Logger.Errorf("etcd.Delete(\"%s\") error(%v)", vPath, err)
+
+		return err
+	}
+
+	return nil
 }
 
 func (c *Client) Close() {

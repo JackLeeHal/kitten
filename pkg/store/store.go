@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"kitten/pkg/errors"
@@ -127,7 +128,7 @@ func (s *Store) parseFreeVolumeIndex() (err error) {
 	return
 }
 
-// parseVolumeIndex parse index from local config and zookeeper.
+// parseVolumeIndex parse index from local config and etcd.
 func (s *Store) parseVolumeIndex() (err error) {
 	var (
 		i          int
@@ -394,7 +395,7 @@ func (s *Store) addVolume(id int32, nv *volume.Volume) {
 }
 
 // AddVolume add a new volume.
-func (s *Store) AddVolume(id int32) (v *volume.Volume, err error) {
+func (s *Store) AddVolume(ctx context.Context, id int32) (v *volume.Volume, err error) {
 	var ov *volume.Volume
 	// try check exists
 	if ov = s.Volumes[id]; ov != nil {
@@ -408,10 +409,10 @@ func (s *Store) AddVolume(id int32) (v *volume.Volume, err error) {
 	if ov = s.Volumes[id]; ov == nil {
 		s.addVolume(id, v)
 		if err = s.saveVolumeIndex(); err == nil {
-
+			s.etcd.AddVolume(ctx, id, v.Meta())
 		}
 		if err != nil {
-			log.Logger.Errorf("add volume: %d error(%v), local index or zookeeper index may save failed", id, err)
+			log.Logger.Errorf("add volume: %d error(%v), local index or etcd index may save failed", id, err)
 		}
 	} else {
 		err = errors.ErrVolumeExist
@@ -439,14 +440,17 @@ func (s *Store) delVolume(id int32) {
 }
 
 // DelVolume del the volume by volume id.
-func (s *Store) DelVolume(id int32) (err error) {
+func (s *Store) DelVolume(ctx context.Context, id int32) (err error) {
 	var v *volume.Volume
 	s.vlock.Lock()
 	if v = s.Volumes[id]; v != nil {
 		if !v.Compact {
 			s.delVolume(id)
+			if err = s.saveVolumeIndex(); err == nil {
+				err = s.etcd.DelVolume(ctx, id)
+			}
 			if err != nil {
-				log.Logger.Errorf("del volume: %d error(%v), local index or zookeeper index may save failed", id, err)
+				log.Logger.Errorf("del volume: %d error(%v), local index or etcd index may save failed", id, err)
 			}
 		} else {
 			err = errors.ErrVolumeInCompact
@@ -464,7 +468,7 @@ func (s *Store) DelVolume(id int32) (err error) {
 }
 
 // BulkVolume copy a super block from another store server add to this server.
-func (s *Store) BulkVolume(id int32, bfile, ifile string) (err error) {
+func (s *Store) BulkVolume(ctx context.Context, id int32, bfile, ifile string) (err error) {
 	var v, nv *volume.Volume
 	// recovery new block
 	if nv, err = newVolume(id, bfile, ifile, s.conf); err != nil {
@@ -473,8 +477,11 @@ func (s *Store) BulkVolume(id int32, bfile, ifile string) (err error) {
 	s.vlock.Lock()
 	if v = s.Volumes[id]; v == nil {
 		s.addVolume(id, nv)
+		if err = s.saveVolumeIndex(); err == nil {
+			err = s.etcd.AddVolume(ctx, id, nv.Meta())
+		}
 		if err != nil {
-			log.Logger.Errorf("bulk volume: %d error(%v), local index or zookeeper index may save failed", id, err)
+			log.Logger.Errorf("bulk volume: %d error(%v), local index or etcd index may save failed", id, err)
 		}
 	} else {
 		err = errors.ErrVolumeExist
@@ -484,7 +491,7 @@ func (s *Store) BulkVolume(id int32, bfile, ifile string) (err error) {
 }
 
 // CompactVolume compact a super block to another file.
-func (s *Store) CompactVolume(id int32) (err error) {
+func (s *Store) CompactVolume(ctx context.Context, id int32) (err error) {
 	var (
 		v, nv      *volume.Volume
 		bdir, idir string
@@ -512,8 +519,11 @@ func (s *Store) CompactVolume(id int32) (err error) {
 	if v = s.Volumes[id]; v != nil {
 		log.Logger.Infof("stop compact volume: (%d) %s to %s", id, v.Block.File, nv.Block.File)
 		if err = v.StopCompact(nv); err == nil {
+			if err = s.saveVolumeIndex(); err == nil {
+				err = s.etcd.SetVolume(ctx, id, v.Meta())
+			}
 			if err != nil {
-				log.Logger.Errorf("compact volume: %d error(%v), local index or zookeeper index may save failed", id, err)
+				log.Logger.Errorf("compact volume: %d error(%v), local index or etcd index may save failed", id, err)
 			}
 		}
 	} else {
@@ -549,6 +559,10 @@ func (s *Store) Close() {
 		log.Logger.Infof("volume[%d] close", v.Id)
 		v.Close()
 	}
+	if s.etcd != nil {
+		s.etcd.Close()
+	}
+
 	return
 }
 
