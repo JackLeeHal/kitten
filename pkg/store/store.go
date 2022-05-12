@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"kitten/pkg/errors"
-	"kitten/pkg/etcd"
 	"kitten/pkg/log"
 	"kitten/pkg/store/conf"
+	"kitten/pkg/store/etcd"
 	myos "kitten/pkg/store/os"
 	"kitten/pkg/store/volume"
 	"os"
@@ -86,7 +86,7 @@ func NewStore(c *conf.Config) (s *Store, err error) {
 // init init the store.
 func (s *Store) init() (err error) {
 	if err = s.parseFreeVolumeIndex(); err == nil {
-		err = s.parseVolumeIndex()
+		err = s.parseVolumeIndex(context.Background())
 	}
 	return
 }
@@ -129,7 +129,7 @@ func (s *Store) parseFreeVolumeIndex() (err error) {
 }
 
 // parseVolumeIndex parse index from local config and etcd.
-func (s *Store) parseVolumeIndex() (err error) {
+func (s *Store) parseVolumeIndex(ctx context.Context) (err error) {
 	var (
 		i          int
 		ok         bool
@@ -143,7 +143,7 @@ func (s *Store) parseVolumeIndex() (err error) {
 		lbfs, lifs []string
 		zbfs, zifs []string
 		lim        map[int32]struct{}
-		//zim        map[int32]struct{}
+		zim        map[int32]struct{}
 	)
 	if data, err = ioutil.ReadAll(s.vf); err != nil {
 		log.Logger.Errorf("ioutil.ReadAll() error(%v)", err)
@@ -153,7 +153,10 @@ func (s *Store) parseVolumeIndex() (err error) {
 	if lim, lids, lbfs, lifs, err = s.parseIndex(lines); err != nil {
 		return
 	}
-	if _, zids, zbfs, zifs, err = s.parseIndex(lines); err != nil {
+	if lines, err = s.etcd.Volumes(ctx); err != nil {
+		return
+	}
+	if zim, zids, zbfs, zifs, err = s.parseIndex(lines); err != nil {
 		return
 	}
 	// local index
@@ -166,8 +169,17 @@ func (s *Store) parseVolumeIndex() (err error) {
 			return
 		}
 		s.Volumes[id] = v
+		if _, ok = zim[id]; !ok {
+			if err = s.etcd.AddVolume(ctx, id, v.Meta()); err != nil {
+				return
+			}
+		} else {
+			if err = s.etcd.SetVolume(ctx, id, v.Meta()); err != nil {
+				return
+			}
+		}
 	}
-	// zk index
+	// etcd index
 	for i = 0; i < len(zbfs); i++ {
 		id, bfile, ifile = zids[i], zbfs[i], zifs[i]
 		if _, ok = s.Volumes[id]; ok {
