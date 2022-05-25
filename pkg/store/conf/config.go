@@ -9,6 +9,11 @@ import (
 )
 
 type Config struct {
+	Pprof         bool
+	PprofListen   string
+	StatListen    string
+	ApiListen     string
+	AdminListen   string
 	NeedleMaxSize int
 	BlockMaxSize  int
 	BatchMaxNum   int
@@ -17,6 +22,15 @@ type Config struct {
 	Volume *Volume
 	Block  *Block
 	Index  *Index
+	Etcd   *Etcd
+}
+
+type Etcd struct {
+	Root     string
+	Rack     string
+	ServerId string
+	Addrs    []string
+	Timeout  Duration
 }
 
 type Store struct {

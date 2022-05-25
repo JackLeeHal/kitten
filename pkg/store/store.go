@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"kitten/pkg/errors"
 	"kitten/pkg/log"
+	"kitten/pkg/meta"
 	"kitten/pkg/store/conf"
 	"kitten/pkg/store/etcd"
 	myos "kitten/pkg/store/os"
@@ -89,6 +90,14 @@ func (s *Store) init() (err error) {
 		err = s.parseVolumeIndex(context.Background())
 	}
 	return
+}
+
+func (s *Store) SetEtcd(ctx context.Context) error {
+	return s.etcd.SetStore(ctx, &meta.Store{
+		Stat:  s.conf.StatListen,
+		Admin: s.conf.AdminListen,
+		Api:   s.conf.ApiListen,
+	})
 }
 
 // parseFreeVolumeIndex parse free index from local.

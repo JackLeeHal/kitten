@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"google.golang.org/grpc"
 	pb "kitten/api/store"
@@ -24,6 +25,10 @@ func main() {
 		log.Fatalf("new config failed, err:%v", err)
 	}
 	s, err := store.NewStore(c)
+	if err != nil {
+		log.Fatalf("new store failed, err:%v", err)
+	}
+	err = s.SetEtcd(context.Background())
 	if err != nil {
 		log.Fatalf("new store failed, err:%v", err)
 	}
