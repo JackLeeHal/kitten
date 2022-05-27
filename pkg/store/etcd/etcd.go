@@ -9,6 +9,7 @@ import (
 	"kitten/pkg/store/conf"
 	"path"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -18,26 +19,38 @@ type Client struct {
 	*clientv3.Client
 }
 
-func NewClient(endpoints []string, path string) *Client {
+func NewEtcd(c *conf.Config) (*Client, error) {
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   endpoints,
+		Endpoints:   c.Etcd.Addrs,
 		DialTimeout: 5 * time.Second,
 	})
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	return &Client{
 		Client: cli,
-		path:   path,
+		path:   strings.TrimRight(path.Join(c.Etcd.Root, c.Etcd.Rack, c.Etcd.ServerId), "/"),
+	}, nil
+}
+
+func (c *Client) SetRoot(ctx context.Context) error {
+	if _, err := c.Get(ctx, c.conf.Etcd.Root); err != nil {
+		log.Logger.Errorf("etcd.Get(\"%s\") error(%v)", c.conf.Etcd.Root, err)
+		return err
 	}
+	if _, err := c.Put(ctx, c.conf.Etcd.Root, ""); err != nil {
+		log.Logger.Errorf("etcd.Put(\"%s\", \"\") error(%v)", c.conf.Etcd.Root, err)
+		return err
+	}
+
+	return nil
 }
 
 func (c *Client) SetStore(ctx context.Context, s *meta.Store) (err error) {
 	var (
 		saveData []byte
-		//stat *stat.Stat
-		os = new(meta.Store)
+		os       = new(meta.Store)
 	)
 	s.Id = c.conf.Etcd.ServerId
 	s.Rack = c.conf.Etcd.Rack
@@ -66,13 +79,21 @@ func (c *Client) SetStore(ctx context.Context, s *meta.Store) (err error) {
 	return
 }
 
-func (c *Client) Volumes(ctx context.Context) (lines []string, err error) {
-	resp, err := c.Client.Get(ctx, c.path)
+func (c *Client) Volumes(ctx context.Context) ([]string, error) {
+	resp, err := c.Get(ctx, c.path, clientv3.WithPrefix())
+	if err != nil {
+		return nil, err
+	}
+	var lines []string
 	for _, v := range resp.Kvs {
-		lines = append(lines, string(v.Value))
+		line, err := c.Get(ctx, string(v.Key))
+		if err != nil {
+			return nil, err
+		}
+		lines = append(lines, string(line.Kvs[0].Value))
 	}
 
-	return
+	return lines, nil
 }
 
 func (c *Client) AddVolume(ctx context.Context, id int32, data []byte) error {
@@ -105,7 +126,7 @@ func (c *Client) DelVolume(ctx context.Context, id int32) error {
 
 		return err
 	}
-	_, err := c.Client.Delete(ctx, vPath)
+	_, err := c.Delete(ctx, vPath)
 	if err != nil {
 		log.Logger.Errorf("etcd.Delete(\"%s\") error(%v)", vPath, err)
 

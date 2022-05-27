@@ -61,8 +61,13 @@ type Store struct {
 }
 
 // NewStore
-func NewStore(c *conf.Config) (s *Store, err error) {
-	s = &Store{
+func NewStore(c *conf.Config) (*Store, error) {
+	e, err := etcd.NewEtcd(c)
+	if err != nil {
+		return nil, err
+	}
+	s := &Store{
+		etcd:    e,
 		conf:    c,
 		FreeId:  0,
 		Volumes: make(map[int32]*volume.Volume),
@@ -70,18 +75,21 @@ func NewStore(c *conf.Config) (s *Store, err error) {
 	if s.vf, err = os.OpenFile(c.Store.VolumeIndex, os.O_RDWR|os.O_CREATE, 0664); err != nil {
 		log.Logger.Errorf("os.OpenFile(\"%s\") error(%v)", c.Store.VolumeIndex, err)
 		s.Close()
+
 		return nil, err
 	}
 	if s.fvf, err = os.OpenFile(c.Store.FreeVolumeIndex, os.O_RDWR|os.O_CREATE, 0664); err != nil {
 		log.Logger.Errorf("os.OpenFile(\"%s\") error(%v)", c.Store.FreeVolumeIndex, err)
 		s.Close()
+
 		return nil, err
 	}
 	if err = s.init(); err != nil {
 		s.Close()
 		return nil, err
 	}
-	return
+
+	return s, nil
 }
 
 // init init the store.
@@ -93,11 +101,18 @@ func (s *Store) init() (err error) {
 }
 
 func (s *Store) SetEtcd(ctx context.Context) error {
-	return s.etcd.SetStore(ctx, &meta.Store{
+	if err := s.etcd.SetStore(ctx, &meta.Store{
 		Stat:  s.conf.StatListen,
 		Admin: s.conf.AdminListen,
 		Api:   s.conf.ApiListen,
-	})
+	}); err != nil {
+		return err
+	}
+	if err := s.etcd.SetRoot(ctx); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // parseFreeVolumeIndex parse free index from local.
@@ -430,7 +445,7 @@ func (s *Store) AddVolume(ctx context.Context, id int32) (v *volume.Volume, err 
 	if ov = s.Volumes[id]; ov == nil {
 		s.addVolume(id, v)
 		if err = s.saveVolumeIndex(); err == nil {
-			s.etcd.AddVolume(ctx, id, v.Meta())
+			err = s.etcd.AddVolume(ctx, id, v.Meta())
 		}
 		if err != nil {
 			log.Logger.Errorf("add volume: %d error(%v), local index or etcd index may save failed", id, err)
