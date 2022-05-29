@@ -37,6 +37,13 @@ var (
 			SyncWrite:     10,
 			Syncfilerange: true,
 		},
+		Etcd: &conf.Etcd{
+			Root:     "test",
+			Rack:     "1",
+			ServerId: "1",
+			Addrs:    []string{"localhost:1234"},
+			Timeout:  conf.Duration{},
+		},
 	}
 )
 
