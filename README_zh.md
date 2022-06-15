@@ -3,8 +3,7 @@
 [![Go](https://github.com/JackLeeHal/kitten/actions/workflows/go.yml/badge.svg)](https://github.com/JackLeeHal/kitten/actions/workflows/go.yml)
 
 ## What is kitten
-Kitten 是一个为大规模小文件存储而生的分布式文件系统，核心架构参考了[Facebook的Haystack](https://www.usenix.org/legacy/event/osdi10/tech/full_papers/Beaver.pdf)，
-并且从[bfs](https://github.com/Terry-Mao/bfs)中学习了很多优化手段。（本项目只是一个学习项目，未经过生产环境验证）
+Kitten 是一个为大规模小文件存储而生的分布式文件系统，核心架构参考了[Facebook的Haystack](https://www.usenix.org/legacy/event/osdi10/tech/full_papers/Beaver.pdf)。 （本项目只是一个学习项目，未经过生产环境验证）
 
 ## Features
 
