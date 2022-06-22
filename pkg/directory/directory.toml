@@ -1,0 +1,32 @@
+# listen
+ApiListen = "localhost:6065"
+
+#batchUpload max num of keys once upload
+MaxNum = 16
+
+# enable golang pprof
+PprofEnable = true
+
+# pprof http addr
+PprofListen = "localhost:6066"
+
+[etcd]
+# etcd cluster addrs, multiple addrs split by ",".
+Addrs = [
+    "localhost:2181"
+]
+
+# etcd heartbeat timeout.
+Timeout = "15s"
+
+# etcd storeroot path.
+StoreRoot = "/rack"
+
+# etcd volumeroot path
+VolumeRoot = "/volume"
+
+# etcd grouproot path
+GroupRoot = "/group"
+
+# etcd pullinterval
+PullInterval = "10s"
