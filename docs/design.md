@@ -15,9 +15,43 @@ Kitten is suitable for files that：`written once`, `read often`, `never modifie
 Goal of Kitten：`High throughput + low delay`, `Fault-tolerant`, `Cost-effective`, `Simple`.
 
 Kitten includes the following modules：
-![](docs/kitten.png)
+![](kitten.png)
 
 ### Store
+
+As the core module of the whole system, a `store` is composed of multiple `Superblocks` and a `Superblock` is composed of multiple `Needles`.
+
+![](img.png)
+
+![](img_1.png)
+
+To read the required data faster, each store also maintains an in-memory data structure, Key is the Key of the Needle, and value is the offset and size of the Needle. This only needs to hold the fd of a block to find all the data inside.
+
+The pb of the Store module is expressed below:
+
+```
+service Store {
+  rpc GetFile(GetFileRequest) returns (GetFileResponse) {}
+  rpc UploadFile(UploadFileRequest) returns (UploadFileResponse) {}
+  rpc DeleteFile(DeleteFileRequest) returns (DeleteFileResponse) {}
+}
+```
+
+The three operations are described in detail below
+
+#### Read
+
+The Store receives three parameters when it reads the file：vid， key， cookie(Prevent brute force attacks that guess how file address URLs are spliced).
+
+vid represents the id of Volume, and store first finds the corresponding Superblock through vid. Then find the offset and size corresponding to the Needle through the key. This only takes one ReadAt to get the data.
+
+#### Write
+
+The parameter of the file when it is written is only one more real data of the file than when it is read. The Store writes a Superblock and then updates the in-memory map(append-only). When doing the update operation, because it is written sequentially, it is necessary to update the map in memory to ensure that the old Needle will not be read.
+
+#### Delete
+
+File deletion only requires setting the Flag in the Needle to delete. Requesting a file that has already been deleted returns an error. Deleted files temporarily take up storage space, and more on how to deal with orphaned Needles later.
 
 ### Proxy
 

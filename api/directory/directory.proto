@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package directory;
+
+option go_package = "api/directory";
+
+service Directory {
+  // Get store servers
+  rpc Get(GetRequest) returns (GetResponse) {}
+  // Upload get vid and store servers for upload
+  rpc Upload(UploadRequest) returns (UploadResponse) {}
+}
+
+message GetRequest {
+  int32 vid = 1;
+}
+
+message GetResponse {
+  repeated string stores = 1;
+}
+
+message UploadRequest {
+  string filename = 1;
+}
+
+message UploadResponse {
+  int32 vid = 1;
+  repeated string stores = 2;
+}

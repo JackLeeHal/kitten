@@ -3,7 +3,7 @@
 [![Go](https://github.com/JackLeeHal/kitten/actions/workflows/go.yml/badge.svg)](https://github.com/JackLeeHal/kitten/actions/workflows/go.yml)
 
 ## What is kitten
-Kitten 是一个为大规模小文件存储而生的分布式文件系统，核心架构参考了[Facebook的Haystack](https://www.usenix.org/legacy/event/osdi10/tech/full_papers/Beaver.pdf)。 （本项目只是一个学习项目，未经过生产环境验证）
+Kitten 是一个为大规模小文件存储而生的分布式文件系统，核心架构参考了[Facebook的Haystack](https://www.usenix.org/legacy/event/osdi10/tech/full_papers/Beaver.pdf)。
 
 ## Features
 
@@ -33,6 +33,6 @@ kitten 受这些项目启发:
 
 [seaweedfs](https://github.com/chrislusf/seaweedfs) SeaweedFS is a fast distributed storage system for blobs, objects, files, and data lake, for billions of files!
 
-再次感谢 Jetbrains 的开源 Licence 赞助!
+再次感谢 Jetbrains 的赞助!
 
 ![](/docs/jb_square.svg) 

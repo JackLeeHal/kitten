@@ -17,15 +17,15 @@ Kitten 适合的文件特点是：`一次写入`，`从不更新`，`不定期�
 Kitten 的设计目标是：`高吞吐+低延时`，`有容错机制`，`低成本`，`架构简单`.
 
 围绕这些目标，Kitten 包含了以下几个模块：
-![](docs/kitten.png)
+![](kitten.png)
 
 ### Store
 
 Store 作为整个系统最核心的模块，一个 `store` 由多个 `Superblock`组成，一个 `Superblock` 由多个 `Needle` 组成。
 
-![](docs/img.png)
+![](img.png)
 
-![](docs/img_1.png)
+![](img_1.png)
 
 为了更快的读到所需的数据，每个 Store 还会维护一个内存中的数据结构，Key 是 Needle 的 Key，value 则是这个 Needle 的 offset 和 size。这样只需要持有一个 block 的 fd 就能找到里面的所有数据。
 
