@@ -8,7 +8,7 @@ const (
 	// store
 	RetStoreNotAvailable = 30300
 	// zookeeper
-	RetZookeeperDataError = 30400
+	RetEtcdDataError = 30400
 )
 
 var (
@@ -18,6 +18,6 @@ var (
 	ErrIdNotAvailable = Error(RetIdNotAvailable)
 	// store
 	ErrStoreNotAvailable = Error(RetStoreNotAvailable)
-	// zookeeper
-	ErrZookeeperDataError = Error(RetZookeeperDataError)
+	// etcd
+	ErrEtcdDataError = Error(RetEtcdDataError)
 )

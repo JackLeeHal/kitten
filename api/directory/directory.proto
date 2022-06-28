@@ -25,5 +25,7 @@ message UploadRequest {
 
 message UploadResponse {
   int32 vid = 1;
-  repeated string stores = 2;
+  int32 cookie = 2;
+  int64 key = 3;
+  repeated string stores = 4;
 }
