@@ -9,6 +9,7 @@ import (
 	myetcd "kitten/pkg/directory/etcd"
 	"kitten/pkg/log"
 	"kitten/pkg/meta"
+	"kitten/pkg/snowflake"
 	"strconv"
 	"time"
 )
@@ -30,6 +31,7 @@ type Directory struct {
 	volume      map[int32]*meta.VolumeState // volume_id:volume_state
 	volumeStore map[int32][]string          // volume_id:store_server_id
 
+	snowflake  *snowflake.Node
 	dispatcher *Dispatcher // dispatch for write or read reqs
 	config     *conf.Config
 	etcd       *myetcd.Client
@@ -37,9 +39,14 @@ type Directory struct {
 
 func NewDirectory(config *conf.Config) (*Directory, error) {
 	e := myetcd.NewClient(config)
+	s, err := snowflake.NewNode(config.SnowflakeID)
+	if err != nil {
+		return nil, err
+	}
 	d := &Directory{
 		etcd:       e,
 		dispatcher: NewDispatcher(),
+		snowflake:  s,
 	}
 
 	go d.SyncEtcd()
@@ -195,4 +202,8 @@ func (d *Directory) syncVolumes(ctx context.Context) error {
 	d.volumeStore = volumeStore
 
 	return nil
+}
+
+func (d *Directory) cookie() (cookie int32) {
+	return int32(uint16(time.Now().UnixNano())) + 1
 }

@@ -58,5 +58,11 @@ func (s *Server) Upload(ctx context.Context, req *pb.UploadRequest) (*pb.UploadR
 		}
 		stores = append(stores, s.Api)
 	}
-	return nil, nil
+
+	return &pb.UploadResponse{
+		Vid:    vid,
+		Cookie: s.directory.cookie(),
+		Key:    s.directory.snowflake.Generate().Int64(),
+		Stores: stores,
+	}, nil
 }

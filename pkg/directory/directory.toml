@@ -4,6 +4,8 @@ ApiListen = "localhost:6065"
 #batchUpload max num of keys once upload
 MaxNum = 16
 
+SnowflakeID = 1
+
 # enable golang pprof
 PprofEnable = true
 

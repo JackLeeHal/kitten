@@ -11,6 +11,7 @@ import (
 type Config struct {
 	Etcd *Etcd
 
+	SnowflakeID int64
 	MaxNum      int
 	ApiListen   string
 	PprofEnable bool
