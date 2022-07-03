@@ -142,7 +142,7 @@ func (d *Dispatcher) VolumeID(group map[int][]string, storeVolume map[string][]i
 	gid = d.gids[d.rand.Intn(len(d.gids))]
 	stores = group[gid]
 	if len(stores) == 0 {
-		err = errors.ErrZookeeperDataError
+		err = errors.ErrEtcdDataError
 		return
 	}
 	vid = d.wrtVids[stores[0]]

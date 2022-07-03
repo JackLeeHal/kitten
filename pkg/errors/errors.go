@@ -69,7 +69,7 @@ var (
 		// store
 		RetStoreNotAvailable: "store not available",
 		// zookeeper
-		RetZookeeperDataError: "zookeeper data error",
+		RetEtcdDataError: "zookeeper data error",
 		/* ========================= Directory ========================= */
 		/* ========================= Proxy ========================= */
 		// common

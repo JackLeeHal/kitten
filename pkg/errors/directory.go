@@ -7,7 +7,7 @@ const (
 	RetIdNotAvailable = 30200
 	// store
 	RetStoreNotAvailable = 30300
-	// zookeeper
+	// etcd
 	RetEtcdDataError = 30400
 )
 
