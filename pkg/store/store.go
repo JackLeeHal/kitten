@@ -93,11 +93,16 @@ func NewStore(c *conf.Config) (*Store, error) {
 }
 
 // init init the store.
-func (s *Store) init() (err error) {
-	if err = s.parseFreeVolumeIndex(); err == nil {
-		err = s.parseVolumeIndex(context.Background())
+func (s *Store) init() error {
+	if err := s.parseFreeVolumeIndex(); err != nil {
+		return err
+
 	}
-	return
+	if err := s.parseVolumeIndex(context.Background()); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *Store) SetEtcd(ctx context.Context) error {
@@ -221,7 +226,7 @@ func (s *Store) parseVolumeIndex(ctx context.Context) (err error) {
 	return
 }
 
-// parseIndex parse volume info from a index file.
+// parseIndex parse volume info from an index file.
 func (s *Store) parseIndex(lines []string) (im map[int32]struct{}, ids []int32, bfs, ifs []string, err error) {
 	var (
 		id    int64

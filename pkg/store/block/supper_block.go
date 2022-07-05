@@ -103,10 +103,10 @@ func (b *SuperBlock) init() (err error) {
 		return
 	}
 	if b.Size = stat.Size(); b.Size == 0 {
-		//if err = myos.Fallocate(b.w.Fd(), myos.FALLOC_FL_KEEP_SIZE, 0, _maxSize); err != nil {
-		//	log.Logger.Errorf("block: %s Fallocate() error(%s)", b.File, err)
-		//	return
-		//}
+		if err = myos.Fallocate(b.w.Fd(), myos.FALLOC_FL_KEEP_SIZE, 0, _maxSize); err != nil {
+			log.Logger.Errorf("block: %s Fallocate() error(%s)", b.File, err)
+			return
+		}
 		if err = b.writeMeta(); err != nil {
 			log.Logger.Errorf("block: %s writeMeta() error(%v)", b.File, err)
 			return
