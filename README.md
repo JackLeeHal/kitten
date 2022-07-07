@@ -6,7 +6,7 @@
 [简体中文](README_zh.md)
 
 ## About kitten
-Kitten is a distributed file system optimized for small files storage，core concepts based on [Facebook‘s Haystack](https://www.usenix.org/legacy/event/osdi10/tech/full_papers/Beaver.pdf)。 
+Kitten is a distributed file system optimized for small files storage，inspired by [Facebook‘s Haystack](https://www.usenix.org/legacy/event/osdi10/tech/full_papers/Beaver.pdf)。 
 
 ## Features
 
@@ -17,16 +17,16 @@ Kitten is a distributed file system optimized for small files storage，core con
 
 ## Quick Start
 
-Find more detail design in [docs](https://github.com/JackLeeHal/kitten/docs) folder.
+Find more detail design in [docs](https://github.com/JackLeeHal/kitten/tree/main/docs) folder.
 
 ## Roadmap
-| Name                     | Issue                                               | Description                                                                |
-|--------------------------|-----------------------------------------------------|----------------------------------------------------------------------------|
-| Kitten's basic component | [#1](https://github.com/JackLeeHal/kitten/issues/1) | Implement basic component including ~~`Store`~~, `Cache`, `Directory`(WIP) |
-| Introduce Etcd           | [#2](https://github.com/JackLeeHal/kitten/issues/2) | Introduce Etcd for distributed management(WIP).                            |
-| Expose easy APIs         | [#3](https://github.com/JackLeeHal/kitten/issues/3) | Find an elegantly way to expose APIs.                                      |
-| Support S3 API           | [#4](https://github.com/JackLeeHal/kitten/issues/4) | As S3 APIs are the de facto standards for OSS， support S3 style APIs.      |
-| Implement erasure code   | [#5](https://github.com/JackLeeHal/kitten/issues/5) | Split data into two groups(hot/warm), use erasure code to store warm data. |
+| Name                     | Issue                                               | Description                                                                         |
+|--------------------------|-----------------------------------------------------|-------------------------------------------------------------------------------------|
+| Kitten's basic component | [#1](https://github.com/JackLeeHal/kitten/issues/1) | Implement basic component including ~~`Store`~~, `Proxy`, `Directory`(WIP), `Cache` |
+| Introduce Etcd           | [#2](https://github.com/JackLeeHal/kitten/issues/2) | ~~Introduce Etcd for distributed management~~.                                      |
+| Expose easy APIs         | [#3](https://github.com/JackLeeHal/kitten/issues/3) | Find an elegantly way to expose APIs.                                               |
+| Support S3 API           | [#4](https://github.com/JackLeeHal/kitten/issues/4) | As S3 APIs are the de facto standards for OSS， support S3 style APIs.               |
+| Implement erasure code   | [#5](https://github.com/JackLeeHal/kitten/issues/5) | Split data into two groups(hot/warm), use erasure code to store warm data.          |
 
 ## Acknowledgments
 

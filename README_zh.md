@@ -14,16 +14,16 @@ Kitten 是一个为大规模小文件存储而生的分布式文件系统，核�
 
 ## Quick Start
 
-更多的设计和实现细节可在 [docs](https://github.com/JackLeeHal/kitten/docs) 文件夹找到.
+更多的设计和实现细节可在 [docs](https://github.com/JackLeeHal/kitten/tree/main/docs) 文件夹找到.
 
 ## Roadmap
-| Name                     | Issue                                               | Description                                                                |
-|--------------------------|-----------------------------------------------------|----------------------------------------------------------------------------|
-| Kitten's basic component | [#1](https://github.com/JackLeeHal/kitten/issues/1) | Implement basic component including `Store`, `Cache`, `Directory`          |
-| Introduce Etcd           | [#2](https://github.com/JackLeeHal/kitten/issues/2) | Introduce Etcd for distributed management.                                 |
-| Expose easy APIs         | [#3](https://github.com/JackLeeHal/kitten/issues/3) | Find an elegantly way to expose APIs.                                      |
-| Support S3 API           | [#4](https://github.com/JackLeeHal/kitten/issues/4) | As S3 APIs are the de facto standards for OSS， support S3 style APIs.      |
-| Implement erasure code   | [#5](https://github.com/JackLeeHal/kitten/issues/5) | Split data into two groups(hot/warm), use erasure code to store warm data. |
+| Name                     | Issue                                               | Description                                                                         |
+|--------------------------|-----------------------------------------------------|-------------------------------------------------------------------------------------|
+| Kitten's basic component | [#1](https://github.com/JackLeeHal/kitten/issues/1) | Implement basic component including ~~`Store`~~, `Proxy`, `Directory`(WIP), `Cache` |
+| Introduce Etcd           | [#2](https://github.com/JackLeeHal/kitten/issues/2) | ~~Introduce Etcd for distributed management~~.                                      |
+| Expose easy APIs         | [#3](https://github.com/JackLeeHal/kitten/issues/3) | Find an elegantly way to expose APIs.                                               |
+| Support S3 API           | [#4](https://github.com/JackLeeHal/kitten/issues/4) | As S3 APIs are the de facto standards for OSS， support S3 style APIs.               |
+| Implement erasure code   | [#5](https://github.com/JackLeeHal/kitten/issues/5) | Split data into two groups(hot/warm), use erasure code to store warm data.          |
 
 ## 感谢
 

@@ -120,7 +120,7 @@ func NewIndexer(file string, conf *conf.Config) (i *Indexer, err error) {
 		log.Logger.Errorf("os.OpenFile(\"%s\") error(%v)", file, err)
 		return nil, err
 	}
-	if _, err = i.f.Stat(); err != nil {
+	if stat, err = i.f.Stat(); err != nil {
 		log.Logger.Errorf("index: %s Stat() error(%v)", i.File, err)
 		return nil, err
 	}
