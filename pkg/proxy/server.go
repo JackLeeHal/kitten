@@ -1,7 +1,10 @@
 package proxy
 
 import (
+	"bytes"
+	"context"
 	"google.golang.org/grpc"
+	"io"
 	dpb "kitten/api/directory"
 	pb "kitten/api/store"
 	"log"
@@ -75,7 +78,46 @@ func (s *Server) handleGet(wr http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handlePost(wr http.ResponseWriter, r *http.Request) {
+	file, fileHeader, err := r.FormFile("file")
+	defer file.Close()
+	if err != nil || file == nil {
+		wr.WriteHeader(http.StatusBadRequest)
+		_, _ = wr.Write([]byte("invalid request"))
 
+		return
+	}
+	ctx := context.Background()
+	// directory
+	directoryResp, err := s.directory.Upload(ctx, &dpb.UploadRequest{Filename: fileHeader.Filename})
+	if err != nil {
+		wr.WriteHeader(http.StatusInternalServerError)
+		_, _ = wr.Write([]byte("directory error"))
+
+		return
+	}
+	buf := bytes.NewBuffer(nil)
+	if _, err := io.Copy(buf, file); err != nil {
+		wr.WriteHeader(http.StatusInternalServerError)
+		_, _ = wr.Write([]byte("copy file error"))
+
+		return
+	}
+	// store
+	storeResp, err := s.store.UploadFile(ctx, &pb.UploadFileRequest{
+		Vid:    directoryResp.Vid,
+		Key:    directoryResp.Key,
+		Cookie: directoryResp.Cookie,
+		Data:   buf.Bytes(),
+	})
+	if err != nil {
+		wr.WriteHeader(http.StatusInternalServerError)
+		_, _ = wr.Write([]byte("store upload error"))
+
+		return
+	}
+
+	wr.WriteHeader(http.StatusOK)
+	_, _ = wr.Write([]byte(storeResp.Message))
 }
 
 func (s *Server) handleDelete(wr http.ResponseWriter, r *http.Request) {
