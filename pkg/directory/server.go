@@ -43,6 +43,7 @@ func (s *Server) Get(ctx context.Context, req *pb.GetRequest) (*pb.GetResponse, 
 }
 
 func (s *Server) Upload(ctx context.Context, req *pb.UploadRequest) (*pb.UploadResponse, error) {
+	// TODO: manage user metadata
 	vid, err := s.directory.dispatcher.VolumeID(s.directory.group, s.directory.storeVolume)
 	if err != nil {
 		log.Logger.Errorf("dispatcher.VolumeID error(%v)", err)
