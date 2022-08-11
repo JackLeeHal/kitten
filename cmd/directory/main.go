@@ -15,7 +15,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&configFile, "c", "../directory.toml", " set store config file path")
+	flag.StringVar(&configFile, "c", "../directory.toml", " set directory config file path")
 }
 
 func main() {

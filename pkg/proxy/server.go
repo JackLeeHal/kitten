@@ -174,5 +174,46 @@ func (s *Server) handlePost(wr http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleDelete(wr http.ResponseWriter, r *http.Request) {
+	k := r.Form.Get("key")
+	key, err := strconv.Atoi(k)
+	if err != nil {
+		wr.WriteHeader(http.StatusBadRequest)
+		_, _ = wr.Write([]byte("invalid request"))
 
+		return
+	}
+	v := r.Form.Get("vid")
+	vid, err := strconv.Atoi(v)
+	if err != nil {
+		wr.WriteHeader(http.StatusBadRequest)
+		_, _ = wr.Write([]byte("invalid request"))
+
+		return
+	}
+
+	ctx := context.Background()
+	dResp, err := s.directory.Get(ctx, &dpb.GetRequest{
+		Vid: int32(vid),
+	})
+
+	l := len(dResp.Stores)
+	ix := _rand.Intn(l)
+	var resp string
+	for i := 0; i < l; i++ {
+		storeConn, err := grpc.Dial(dResp.Stores[(ix+i)%l])
+		if err != nil {
+			log.Fatalf("error connect to store: %v", err)
+		}
+		storeResp, err := pb.NewStoreClient(storeConn).DeleteFile(ctx, &pb.DeleteFileRequest{
+			Vid:    int32(vid),
+			Key:    int64(key),
+		})
+		if err != nil {
+			continue
+		}
+		resp = storeResp.Message
+	}
+
+	wr.WriteHeader(http.StatusOK)
+	_, _ = wr.Write([]byte(resp))
 }

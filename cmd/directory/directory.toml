@@ -12,7 +12,7 @@ PprofEnable = true
 # pprof http addr
 PprofListen = "localhost:6066"
 
-[etcd]
+[Etcd]
 # etcd cluster addrs, multiple addrs split by ",".
 Addrs = [
     "localhost:2181"

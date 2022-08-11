@@ -1,0 +1,16 @@
+PprofEnable = true
+
+PprofListen = "localhost:2231"
+
+HttpAddr = "localhost:2232"
+
+StoreAddr = "localhost:2235"
+
+Domain = "http://localhost:2232/"                                                                              
+
+Prefix = "/kitten/"
+
+MaxFileSize = 20971520
+
+PurgeMaxSize = 100000
+
